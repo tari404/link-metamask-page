@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Link Metamask Page</title>
+</head>
+<style>
+  body *:not(script) { display: block; }
+</style>
+<body>
+  <ul>
+    <li>
+      <label for="to">to</label>
+      <input type="text" id="to">
+    </li>
+    <li>
+      <label for="data">data</label>
+      <textarea id="data"></textarea>
+    </li>
+    <li>
+      <label for="value">value</label>
+      <input type="text" id="value">
+    </li>
+    <br>
+    <li>
+      <button id="button">submit</button>
+    </li>
+  </ul>
+</body>
+<script>
+(async () => {
+  const ethereum = window.ethereum
+  if (typeof ethereum === 'undefined') return
+  await ethereum.enable()
+  document.querySelector('#button').addEventListener('click', () => {
+    const tx = {
+      from: ethereum.selectedAddress,
+      to: document.querySelector('#to').value || undefined,
+      data: document.querySelector('#data').value || undefined,
+      value: document.querySelector('#value').value || undefined
+    }
+    ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [tx],
+    })
+  })
+})()
+</script>
+</html>
