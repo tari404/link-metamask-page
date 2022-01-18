@@ -28,6 +28,20 @@
       <button id="button">submit</button>
     </li>
   </ul>
+  <br>
+  <br>
+  <ul>
+    <h3>HAC airdrop</h3>
+    <li>
+      <button id="approve-but">approve</button>
+    </li>
+    <br>
+    <li>
+      <label for="addresses">addresses</label>
+      <textarea id="addresses"></textarea>
+      <button id="transfer-but">transfer</button>
+    </li>
+  </ul>
 </body>
 <script>
 (async () => {
@@ -46,6 +60,40 @@
       params: [tx],
     })
   })
+
+  document.querySelector('#approve-but').addEventListener('click', () => {
+    const tx = {
+      from: ethereum.selectedAddress,
+      to: '0xA16c3EF6b22ef86E25a317B3DbF2351d15B4bB2A',
+      data: '0x095ea7b3000000000000000000000000fb499e966da9901060c55fe37df7febbd866f2ca00000000000000000000000000000000ffffffffffffffffffffffffffffffff'
+    }
+    ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [tx],
+    })
+  })
+
+  document.querySelector('#transfer-but').addEventListener('click', () => {
+    const value = document.querySelector('#addresses').value || ''
+    const addresses = value.split(',')
+    const data =
+      '0xa06c1a330000000000000000000000000000000000000000000000000000000000000020' +
+      addresses.length.toString(16).padStart(64, '0') +
+      addresses.map((d) => d.substr(2).toLowerCase().padStart(64, '0')).join('')
+
+      console.log(data)
+
+    const tx = {
+      from: ethereum.selectedAddress,
+      to: '0xfb499e966dA9901060C55fe37df7fEBbD866f2cA',
+      data,
+    }
+    ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [tx],
+    })
+  })
+
 })()
 </script>
 </html>
