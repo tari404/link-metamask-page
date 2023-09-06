@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,8 +8,11 @@
   <title>Link Metamask Page</title>
 </head>
 <style>
-  body *:not(script) { display: block; }
+  body *:not(script) {
+    display: block;
+  }
 </style>
+
 <body>
   <ul>
     <li>
@@ -31,7 +35,16 @@
   <br>
   <br>
   <ul>
-    <h3>HAC airdrop</h3>
+    <h3>airdrop</h3>
+    <li>
+      <label for="value">token</label>
+      <input type="text" id="token">
+    </li>
+    <li>
+      <label for="value">multitrans</label>
+      <input type="text" id="multitrans">
+    </li>
+    <br>
     <li>
       <button id="approve-but">approve</button>
     </li>
@@ -39,61 +52,76 @@
     <li>
       <label for="addresses">addresses</label>
       <textarea id="addresses"></textarea>
+      <label for="addresses">values</label>
+      <textarea id="values"></textarea>
       <button id="transfer-but">transfer</button>
     </li>
   </ul>
 </body>
 <script>
-(async () => {
-  const ethereum = window.ethereum
-  if (typeof ethereum === 'undefined') return
-  await ethereum.enable()
-  document.querySelector('#button').addEventListener('click', () => {
-    const tx = {
-      from: ethereum.selectedAddress,
-      to: document.querySelector('#to').value || undefined,
-      data: document.querySelector('#data').value || undefined,
-      value: document.querySelector('#value').value || undefined
-    }
-    ethereum.request({
-      method: 'eth_sendTransaction',
-      params: [tx],
+  (async () => {
+    const ethereum = window.ethereum
+    if (typeof ethereum === 'undefined') return
+    await ethereum.enable()
+    document.querySelector('#button').addEventListener('click', () => {
+      const tx = {
+        from: ethereum.selectedAddress,
+        to: document.querySelector('#to').value || undefined,
+        data: document.querySelector('#data').value || undefined,
+        value: document.querySelector('#value').value || undefined
+      }
+      ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [tx],
+      })
     })
-  })
 
-  document.querySelector('#approve-but').addEventListener('click', () => {
-    const tx = {
-      from: ethereum.selectedAddress,
-      to: '0xA16c3EF6b22ef86E25a317B3DbF2351d15B4bB2A',
-      data: '0x095ea7b3000000000000000000000000fb499e966da9901060c55fe37df7febbd866f2ca00000000000000000000000000000000ffffffffffffffffffffffffffffffff'
-    }
-    ethereum.request({
-      method: 'eth_sendTransaction',
-      params: [tx],
+    document.querySelector('#approve-but').addEventListener('click', () => {
+      const multitrans = document.querySelector('#multitrans').value || ''
+      const token = document.querySelector('#token').value || ''
+
+      const tx = {
+        from: ethereum.selectedAddress,
+        to: token,
+        data: `0x095ea7b3000000000000000000000000${multitrans.slice(2)}00000000000000000000000000000000ffffffffffffffffffffffffffffffff`
+      }
+      ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [tx],
+      })
     })
-  })
 
-  document.querySelector('#transfer-but').addEventListener('click', () => {
-    const value = document.querySelector('#addresses').value || ''
-    const addresses = value.split(',')
-    const data =
-      '0xa06c1a330000000000000000000000000000000000000000000000000000000000000020' +
-      addresses.length.toString(16).padStart(64, '0') +
-      addresses.map((d) => d.substr(2).toLowerCase().padStart(64, '0')).join('')
+    document.querySelector('#transfer-but').addEventListener('click', () => {
+      const multitrans = document.querySelector('#multitrans').value || ''
+
+      const addresses = (document.querySelector('#addresses').value || '').split(',')
+      const values = (document.querySelector('#values').value || '').split(',').map((i) => BigInt(i))
+
+      const total = values.reduce((s, c) => s + c, 0n)
+
+      const data =
+        '0x652519e0' +
+        '0000000000000000000000000000000000000000000000000000000000000020' +
+        addresses.length.toString(16).padStart(64, '0') +
+        addresses.map((d) => d.substr(2).toLowerCase().padStart(64, '0')).join('') + '0000000000000000000000000000000000000000000000000000000000000020' +
+        values.length.toString(16).padStart(64, '0') +
+        values.map((d) => d.toString(16).padStart(64, '0')).join('') +
+        total.toString(16).padStart(64, '0')
 
       console.log(data)
 
-    const tx = {
-      from: ethereum.selectedAddress,
-      to: '0xfb499e966dA9901060C55fe37df7fEBbD866f2cA',
-      data,
-    }
-    ethereum.request({
-      method: 'eth_sendTransaction',
-      params: [tx],
+      const tx = {
+        from: ethereum.selectedAddress,
+        to: multitrans,
+        data,
+      }
+      ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [tx],
+      })
     })
-  })
 
-})()
+  })()
 </script>
+
 </html>
